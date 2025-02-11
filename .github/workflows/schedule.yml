@@ -1,15 +1,15 @@
 name: Build and Publish AFL Predictions
 
 on:
-  # Run daily at 1:00 UTC
   schedule:
     - cron: '0 1 * * *'
-  # Also allow manual runs by clicking "Run workflow" in GitHub
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # <--- Add this
 
     steps:
       - name: Check out repo
@@ -30,18 +30,9 @@ jobs:
 
       - name: Commit and push predictions_output.html to gh-pages
         run: |
-          # Configure Git
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          
-          # Create or switch to gh-pages branch
           git checkout -B gh-pages
-          
-          # Add the generated HTML
           git add predictions_output.html
-          
-          # Commit changes
           git commit -m "Update predictions [skip ci]" || echo "No changes to commit"
-          
-          # Push to gh-pages branch
           git push -f origin gh-pages
