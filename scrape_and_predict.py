@@ -8,18 +8,40 @@ This script:
 """
 
 import datetime
+import requests
+from bs4 import BeautifulSoup
 
-def fake_scrape():
-    """
-    In a real scenario, you'd use requests + BeautifulSoup or an API call
-    to get AFL data. We'll just return a static list as an example.
-    """
-    afl_matches = [
-        {"home": "Geelong", "away": "Carlton", "venue": "MCG"},
-        {"home": "Sydney", "away": "Essendon", "venue": "SCG"},
-        {"home": "Melbourne", "away": "Hawthorn", "venue": "MCG"},
-    ]
-    return afl_matches
+def real_scrape():
+    url = "https://www.footywire.com/afl/footy/ft_match_list?year=2023"  # Example
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, "html.parser")
+    
+    # Parse the HTML for the data you need.
+    # For instance, each match row might be in a <table> or specific tags.
+    
+    match_data = []
+    # Example pseudo-code:
+    rows = soup.select("table.fixedTable tr")  # Just an example
+    for row in rows[1:]:  # skip header
+        cols = row.find_all("td")
+        if len(cols) < 5:
+            continue
+        
+        # Extract columns as needed
+        date = cols[0].get_text(strip=True)
+        teams = cols[1].get_text(strip=True)  # e.g. "Carlton vs Collingwood"
+        # ...
+        
+        # Possibly parse out home/away teams from that "teams" string
+        # or store them raw:
+        match_data.append({
+            "date": date,
+            "teams": teams,
+            # etc.
+        })
+    
+    return match_data
+
 
 def fake_predict(matches):
     """
@@ -85,7 +107,7 @@ def generate_html(predictions):
         f.write(html_content)
 
 def main():
-    matches = fake_scrape()
+    matches = real_scrape()
     predictions = fake_predict(matches)
     generate_html(predictions)
 
